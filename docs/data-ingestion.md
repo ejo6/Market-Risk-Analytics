@@ -1,7 +1,6 @@
 # Data Ingestion
 ## Data Sourcing
-The primary source of data for development is the Tiingo API (stock data is vendor specific, ticket metadata is always Tiingo API).
-Users bring thier own key and hit the endpoint.
+The primary source of data for development is the Tiingo API (stock data is vendor specific, ticket metadata is always Tiingo API). Users bring thier own key and hit the endpoint.
 
 ### Tiingo
 There are two types of call we'll make:
@@ -14,14 +13,10 @@ There are two types of call we'll make:
 
 Mutual Fund NAVs are available after 12 AM EST. The fields "open", "high", "low", "close" will contain the NAV value for the given day.
 
-We hit this enpoint to grab the following tuple response: `(date,open,high,low,close,volume,divCash,splitFactor)`. 
-For all business days from 1993-2026 current day, a ticker loads around 600KB of data. Along with this, each ticker will 
-have a metadata call.
+We hit this enpoint to grab the following tuple response: `(date,open,high,low,close,volume,divCash,splitFactor)`. For all business days from 1993-2026 current day, a ticker loads around 600KB of data. Along with this, each ticker will have a metadata call.
 
 ## Overall data flow
-A preliminary design choice was to not write this in C++, since most of the time is spend waiting on I/O 
-(API endpoitns, as well as on-device I/O which is already well optimized in python). 
-Future A/B testing for python vs. C++ will see if there is significant differences.
+A preliminary design choice was to not write this in C++, since most of the time is spend waiting on I/O (API endpoitns, as well as on-device I/O which is already well optimized in python). Future A/B testing for python vs. C++ will see if there is significant differences.
 
 Will write this mermaid soon:
 
@@ -50,8 +45,7 @@ python/mra/ingest/
     run.py # the pipeline loop + CLI entry poin
 ```
 
-Fetching and ingestion are kept seperate intentionally (especially inv development). Data transformations may be buggy/require change,
-so the files are written to disk beforehand to avoid repeat calls.  
+Fetching and ingestion are kept seperate intentionally (especially inv development). Data transformations may be buggy/require change, so the files are written to disk beforehand to avoid repeat calls.  
 
 ### Providers
 The base interface for dependency injection lives in `python/mra/ingest/providers/base.py`, and is defined as:
