@@ -1,0 +1,23 @@
+# Private environment files
+.env
+priv/
+
+# Local data (see MRA_DATA_DIR in python/mra/paths.py)
+data/
+
+# Build output
+build/
+dist/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.venv/
+
+# OS
+.DS_Store
+
+# IDE/Agent config
+.vscode
+.claude
+.codex
+.copilot

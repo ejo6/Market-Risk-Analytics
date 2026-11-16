@@ -1,0 +1,21 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.13"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "mra"
+version = "0.1.0"
+description = "Market risk analytics: C++ core with Python bindings"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+wheel.packages = ["python/mra"]
+cmake.build-type = "Release"
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
