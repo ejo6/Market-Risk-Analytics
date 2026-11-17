@@ -39,7 +39,7 @@ python/mra/ingest/
     providers/tiingo.py
     ratelimit.py
     validate.py         # check raw file before writing to lake
-    normalize.py        # split basic EOD data, and EOD data with splits or dividens
+    normalize.py        # split basic EOD data, and EOD data with splits or dividends paid
     lake.py
     meta.py             # watermarks, runs, issues
     run.py              # the pipeline loop + CLI entry poin
