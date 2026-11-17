@@ -35,14 +35,14 @@ symbols -> 1 fetch -> 2 save raw file -> 3 parse -> 4 validate -> 5 normalize ->
 For now, the ingestion module will live in `python/mra/ingestion`.
 ```
 python/mra/ingest/
-    providers/base.py # PriceProvider protocol
+    providers/base.py   # PriceProvider protocol
     providers/tiingo.py
     ratelimit.py
-    validate.py
-    normalize.py
+    validate.py         # check raw file before writing to lake
+    normalize.py        # split basic EOD data, and EOD data with splits or dividens
     lake.py
-    meta.py # watermarks, runs, issues
-    run.py # the pipeline loop + CLI entry poin
+    meta.py             # watermarks, runs, issues
+    run.py              # the pipeline loop + CLI entry poin
 ```
 
 Fetching and ingestion are kept seperate intentionally (especially inv development). Data transformations may be buggy/require change, so the files are written to disk beforehand to avoid repeat calls.  
