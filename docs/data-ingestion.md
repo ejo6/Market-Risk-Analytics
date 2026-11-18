@@ -1,7 +1,6 @@
 # Data Ingestion
 ## Data Sourcing
-The primary source of data for development is the Tiingo API (stock data is vendor specific, ticket metadata is always Tiingo API).
-Users bring thier own key and hit the endpoint.
+The primary source of data for development is the Tiingo API (stock data is vendor specific, ticket metadata is always Tiingo API). Users bring thier own key and hit the endpoint.
 
 ### Tiingo
 There are two types of call we'll make:
@@ -14,14 +13,10 @@ There are two types of call we'll make:
 
 Mutual Fund NAVs are available after 12 AM EST. The fields "open", "high", "low", "close" will contain the NAV value for the given day.
 
-We hit this enpoint to grab the following tuple response: `(date,open,high,low,close,volume,divCash,splitFactor)`. 
-For all business days from 1993-2026 current day, a ticker loads around 600KB of data. Along with this, each ticker will 
-have a metadata call.
+We hit this enpoint to grab the following tuple response: `(date,open,high,low,close,volume,divCash,splitFactor)`. For all business days from 1993-2026 current day, a ticker loads around 600KB of data. Along with this, each ticker will have a metadata call.
 
 ## Overall data flow
-A preliminary design choice was to not write this in C++, since most of the time is spend waiting on I/O 
-(API endpoitns, as well as on-device I/O which is already well optimized in python). 
-Future A/B testing for python vs. C++ will see if there is significant differences.
+A preliminary design choice was to not write this in C++, since most of the time is spend waiting on I/O (API endpoitns, as well as on-device I/O which is already well optimized in python). Future A/B testing for python vs. C++ will see if there is significant differences.
 
 Will write this mermaid soon:
 
@@ -37,21 +32,20 @@ symbols -> 1 fetch -> 2 save raw file -> 3 parse -> 4 validate -> 5 normalize ->
 ```
 
 ## Ingestion Module
-For now, the ingestion module will live in `python/mra/ingestion`.
+For now, the ingestion module will live in `python/mra/ingest`.
 ```
 python/mra/ingest/
-    providers/base.py # PriceProvider protocol
-    providers/tiingo.py
-    ratelimit.py
-    validate.py
-    normalize.py
-    lake.py
-    meta.py # watermarks, runs, issues
-    run.py # the pipeline loop + CLI entry poin
+    providers/base.py   # PriceProvider protocol
+    providers/tiingo.py 
+    ratelimit.py        # sliding window rate limiter, takes args specific to data vendor
+    validate.py         # check raw file before writing to lake 
+    normalize.py        # split basic EOD data, and EOD data with splits or dividends paid
+    lake.py             # database access layer for the datalake
+    meta.py             # watermarks, runs, issues
+    run.py              # the pipeline loop + CLI entry poin
 ```
 
-Fetching and ingestion are kept seperate intentionally (especially inv development). Data transformations may be buggy/require change,
-so the files are written to disk beforehand to avoid repeat calls.  
+Fetching and ingestion are kept seperate intentionally (especially inv development). Data transformations may be buggy/require change, so the files are written to disk beforehand to avoid repeat calls.  
 
 ### Providers
 The base interface for dependency injection lives in `python/mra/ingest/providers/base.py`, and is defined as:
@@ -75,3 +69,15 @@ class FetchResult:
 All located in `python/mra/ingest/`
 - `lake.py`: writes raw response to correct datapath, preserves atomicity
 - `ratelimit.py`: sliding window rate limiting algorithm for multiple rate limit types
+- `normalize.py`: split basic EOD data, and EOD data with splits or dividends paid
+- `meta.py`: metadata about previous pulls
+- `validate.py`: validate the data
+
+
+### CLI Data Fetch
+In lieu of a proper UI during development, `python/mra/ingest/cli.py` allows for pulling data:
+
+```bash
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/mra-ingest SPY QQQ TLT # ingests SPY, QQQ, TLT symbol data, default first date
+```
