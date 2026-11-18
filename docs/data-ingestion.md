@@ -32,7 +32,7 @@ symbols -> 1 fetch -> 2 save raw file -> 3 parse -> 4 validate -> 5 normalize ->
 ```
 
 ## Ingestion Module
-For now, the ingestion module will live in `python/mra/ingestion`.
+For now, the ingestion module will live in `python/mra/ingest`.
 ```
 python/mra/ingest/
     providers/base.py   # PriceProvider protocol
