@@ -17,7 +17,7 @@ class SlidingWindowLimiter:
         self.max_wait = max_wait
         self.calls: deque[float] = deque()
 
-    def aquire(self) -> None:
+    def acquire(self) -> None:
         longest = max(window_seconds for _, window_seconds in self.limits)
         while True:
             now = time.monotonic()
@@ -39,6 +39,7 @@ class SlidingWindowLimiter:
             #    Need to confirmt that failed requests still count against rate
             if wait <= 0: 
                 self.calls.append(now)
+                return # !!! Important bugfix
 
             # 4. Too long to wait, just bail in this request and raise exception
             if wait > self.max_wait:

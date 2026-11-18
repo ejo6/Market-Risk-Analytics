@@ -24,10 +24,10 @@ SOFT = {
 def validate_bars(conn: duckdb.DuckDBPyConnection, table: pa.Table) -> tuple[list[str], list[str]]:
     # Bind our pyarrow tale into a SQL
     conn.register("t", table)
-    def run(checks: dict[str][str]):
+    def run(checks: dict[str, str]):
         results = []
         for name, query in checks.items():
-            count = conn.execute(query).fetchone()[0]
+            count = conn.execute(query).fetchall()[0][0]  # fetchall: DuckDB 2 blocks new queries until a result is fully read
             if count:  # skip checks that return 0 | None
                 results.append(f"{name}: {count}")
         return results
