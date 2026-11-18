@@ -1,7 +1,7 @@
-# TiingoProvider tests. All offline except the last one, which only runs with MRA_LIVE_TESTS=1.
+# TiingoProvider tests. All offline: httpx's MockTransport stands in for the network.
+# To pull real data, use the `mra-ingest` command instead (see python/mra/ingest/cli.py).
 
 import json
-import os
 from datetime import date
 
 import httpx
@@ -53,13 +53,14 @@ def test_sends_token_auth_header():
     assert rec.requests[0].headers.get("Authorization") == "Token abc123"
 
 
-def test_url_and_params_without_start():
+def test_first_fetch_asks_for_full_history():
+    # Omitting startDate makes Tiingo return only the latest bar, so it must always be sent.
     rec = Recorder()
     res = make_provider(rec).fetch_daily("SPY", None)
     req = rec.requests[0]
     assert req.url.path == "/tiingo/daily/SPY/prices"
     assert req.url.params.get("format") == "json"
-    assert "startDate" not in req.url.params
+    assert req.url.params.get("startDate") == "1900-01-01"
     assert (res.symbol, res.payload, res.ext) == ("SPY", PAYLOAD, "json")
 
 
@@ -124,14 +125,3 @@ def test_pipeline_with_tiingo_provider(tmp_path):
     )
     assert actions.column("div_cash").to_pylist() == [1.6]
 
-
-# -- live: one real API call --
-
-@pytest.mark.skipif(os.environ.get("MRA_LIVE_TESTS") != "1" or not os.environ.get("TIINGO_KEY"),
-                    reason="set MRA_LIVE_TESTS=1 and TIINGO_KEY to hit the real API (uses 1 call)")
-def test_live_spy_last_month():
-    provider = TiingoProvider(os.environ["TIINGO_KEY"], SlidingWindowLimiter([(50, 3600)]))
-    start = date.today().replace(day=1)
-    t = provider.parse_daily(provider.fetch_daily("SPY", start))
-    assert t.num_rows > 0
-    assert min(t.column("date").to_pylist()) >= start

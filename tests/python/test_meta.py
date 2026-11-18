@@ -1,5 +1,6 @@
 from datetime import date
 
+import duckdb
 import pyarrow as pa
 import pytest
 
@@ -80,7 +81,12 @@ def test_pipeline_happy_path(tmp_path, meta):
     assert meta.run(run_id)["status"] == "ok"
     assert meta.watermark("fake", "daily", "SPY") == "2024-01-04"
     assert (paths.raw_landing("fake", "daily", run_id) / "TLT.json").exists()
-    assert list(paths.lake_table("bars_daily").rglob("*.parquet"))
+
+    # Every symbol's bars must survive, not just the last one written in the run.
+    counts = dict(duckdb.sql(f"""
+        select symbol, count(*) from read_parquet('{paths.lake_table("bars_daily")}/**/*.parquet')
+        group by symbol""").fetchall())
+    assert counts == {"SPY": 3, "TLT": 3}
 
 
 def test_pipeline_uses_watermark_minus_overlap(tmp_path, meta):

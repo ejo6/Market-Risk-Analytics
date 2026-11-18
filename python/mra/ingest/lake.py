@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 from mra.paths import DataPaths
 from mra.ingest.providers.base import FetchResult
 import pyarrow as pa
@@ -57,6 +58,8 @@ class Lake:
         pq.write_to_dataset(
             t, 
             root_path=self.paths.lake_table(table_name), partition_cols=["year"],
-            basename_template=f"part-{run_id}-{{i}}.parquet",
+            # Unique per write: every symbol in a run writes to the same year folders, and:
+            # "overwrite_or_ignore" would let a later symbol replace an earlier one's file.
+            basename_template=f"part-{run_id}-{uuid4().hex[:12]}-{{i}}.parquet",
             existing_data_behavior="overwrite_or_ignore",
         )

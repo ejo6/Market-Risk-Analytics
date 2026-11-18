@@ -36,11 +36,11 @@ For now, the ingestion module will live in `python/mra/ingest`.
 ```
 python/mra/ingest/
     providers/base.py   # PriceProvider protocol
-    providers/tiingo.py
-    ratelimit.py
-    validate.py         # check raw file before writing to lake
+    providers/tiingo.py 
+    ratelimit.py        # sliding window rate limiter, takes args specific to data vendor
+    validate.py         # check raw file before writing to lake 
     normalize.py        # split basic EOD data, and EOD data with splits or dividends paid
-    lake.py
+    lake.py             # database access layer for the datalake
     meta.py             # watermarks, runs, issues
     run.py              # the pipeline loop + CLI entry poin
 ```
@@ -69,3 +69,15 @@ class FetchResult:
 All located in `python/mra/ingest/`
 - `lake.py`: writes raw response to correct datapath, preserves atomicity
 - `ratelimit.py`: sliding window rate limiting algorithm for multiple rate limit types
+- `normalize.py`: split basic EOD data, and EOD data with splits or dividends paid
+- `meta.py`: metadata about previous pulls
+- `validate.py`: validate the data
+
+
+### CLI Data Fetch
+In lieu of a proper UI during development, `python/mra/ingest/cli.py` allows for pulling data:
+
+```bash
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/mra-ingest SPY QQQ TLT # ingests SPY, QQQ, TLT symbol data, default first date
+```

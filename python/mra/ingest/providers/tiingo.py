@@ -12,6 +12,9 @@ class RateLimited(BudgetExhausted): ...
 class TiingoProvider:
     name = "tiingo"
     BASE = "https://api.tiingo.com/tiingo/daily"
+    # Without startDate Tiingo returns only the latest bar, so a first fetch must ask from before any listing
+    # Tiingo then starts at the first bar it has
+    EARLIEST = date(1900, 1, 1)
 
     def __init__(self, api_key: str, limiter: SlidingWindowLimiter, client: httpx.Client | None = None):
         self.limiter = limiter
@@ -19,9 +22,7 @@ class TiingoProvider:
 
     def fetch_daily(self, symbol: str, start: date | None) -> FetchResult:
         # Might want to switch to .csv later
-        params = {"format": "json"}
-        if start:
-            params["startDate"] = start.isoformat()
+        params = {"format": "json", "startDate": (start or self.EARLIEST).isoformat()}
         self.limiter.acquire()
         res = self.client.get(f"{self.BASE}/{symbol}/prices", params=params)
 
