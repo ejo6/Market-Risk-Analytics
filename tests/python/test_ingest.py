@@ -12,18 +12,24 @@ from mra.ingest.validate import validate_bars
 from mra.paths import DataPaths
 
 
-def bars(closes, start_day=1, symbol="SPY"):
+def bars(closes, start_day=1, symbol="SPY", divs=None):
     """Small parsed-provider table: one row per close, flat OHLC around it."""
     n = len(closes)
+    divs = divs or [0.0] * n
     return pa.table({
         "symbol": [symbol] * n,
         "date": [date(2024, 1, start_day + i) for i in range(n)],
         "open": closes, "high": [c + 1 for c in closes],
         "low": [c - 1 for c in closes], "close": closes,
         "volume": pa.array([1000] * n, pa.int64()),
-        "div_cash": [0.0] * n, "split_factor": [1.0] * n,
+        "div_cash": divs, "split_factor": [1.0] * n,
     })
 
+
+def test_dividend_corrected_to_zero_is_written(tmp_path):
+    lake = Lake(DataPaths(tmp_path))
+    assert ingest(lake, bars([100.0, 101.0], divs=[0.0, 1.5]), "r1") == 2
+    assert ingest(lake, bars([100.0, 101.0], divs=[0.0, 0.0]), "r2") == 1  # correction to 0
 
 # -- Rate Limiter --
 
@@ -68,7 +74,7 @@ def test_land_raw_is_written_and_returned(tmp_path):
 
 
 def ingest(lake, table, run_id):
-    b, _ = normalize(lake.conn, table, "tiingo", datetime.now(UTC))
+    b = normalize(lake.conn, table, "tiingo", datetime.now(UTC))    
     changed = lake.only_changed("bars_daily", b, "SPY")
     lake.write_lake("bars_daily", changed, run_id)
     return changed.num_rows

@@ -1,4 +1,4 @@
-**Note** Made with help from Sonnet 5.5 on 2026/11/16, needs a little rewrite
+**Note** Made with lots of help from Sonnet 5.5 on 2026/11/16, needs a little rewrite
 
 #### Summary 
 > A self-hosted, containerized platform that pulls market data into a local versioned lake, runs risk and portfolio analytics in a C++ core, retrains ML models through a gated pipeline, and serves results through an API and a TypeScript UI. The guiding idea is to **ship the pipeline, not the data**: each user supplies their own provider API keys and builds their own dataset.
@@ -63,7 +63,7 @@ Color key: green is the C++ core, purple is Python, blue is storage, white is ex
 
 - A **provider adapter** interface (Tiingo, EODHD, FRED, EDGAR, CSV importer) so users plug in whichever source they have a key for.
 - Workers are **incremental and idempotent**: a per-symbol watermark records what has been fetched, and re-running a job never duplicates data.
-- Pipeline stages: fetch, land raw data unchanged (immutable, timestamped), validate, normalize (splits, dividends, trading calendars), write to the lake.
+- Pipeline stages: fetch, land raw data unchanged (immutable, timestamped), validate, normalize, write to the lake. Prices stay raw in the lake; split and dividend adjustment happens at read time in DuckDB views (see [data-ingestion.md](data-ingestion.md#lake-schema)).
 - Store `ingested_at` next to the data date so you can reconstruct what was known at any point in time.
 
 ### Storage

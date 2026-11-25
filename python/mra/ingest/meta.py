@@ -8,10 +8,12 @@ def _now() -> str:
 
 
 class Meta:
-    # Ingest bookkeeping in meta.sqlite: runs, per-symbol watermarks, and issues
-
-    # Every write commits immediately. That matters most for advance_watermark:
-    #   once it returns, a crash wont lose it, and a crash before it means the symbol is just redone next run
+    """
+    Ingest bookkeeping in meta.sqlite: runs, per-symbol watermarks, and issues
+    
+        Every write commits immediately. That matters most for advance_watermark:
+            once it returns, a crash wont lose it, and a crash before it means the symbol is just redone next run
+    """
 
     SCHEMA = """
     create table if not exists ingest_runs(

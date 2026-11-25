@@ -55,8 +55,19 @@ cp .env.example .env
 
 ## Running tests
 
+Python tests, including the C++/numpy parity tests (rebuild the extension first if you changed C++):
+
 ```bash
+pip install -e ".[dev]"
 pytest
+```
+
+C++ tests (Catch2), built separately from the Python package:
+
+```bash
+cmake -S . -B build -DMRA_BUILD_TESTS=ON -DMRA_BUILD_PYTHON=OFF -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j
+./build/mra_tests            # tests for unfinished stubs are tagged [todo] and hidden; run with "[todo]"
 ```
 
 ## Data storage
@@ -64,7 +75,7 @@ pytest
 All data lives under `MRA_DATA_DIR`, never in the repo:
 
 - `raw/`: Vendor responses exactly as fetched (never modified)
-- `lake/`: Parquet tables (bars_daily, corporate_actions, macro, factors)
+- `lake/`: Parquet tables (bars_daily, macro, factors). Derived data such as adjusted returns is computed on read by the views in `python/mra/views.py`
 - `snapshots/`: Dataset manifests that tie each model to an exact dataset
 - `models/`: Trained models (ONNX) and their metrics
 - `meta.sqlite`: Ingest watermarks, job runs, universe definitions
@@ -74,4 +85,6 @@ See `python/mra/paths.py` for the code that defines this layout.
 ## Documentation
 
 - [High-level design](docs/high-level-design.md): architecture, components, and build order
+- [Data ingestion](docs/data-ingestion.md): pipeline, lake schema, and the returns views
+- [Analytics core](docs/analytics-core.md): conventions, model registry, and how to add a model
 
