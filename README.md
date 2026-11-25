@@ -55,8 +55,19 @@ cp .env.example .env
 
 ## Running tests
 
+Python tests, including the C++/numpy parity tests (rebuild the extension first if you changed C++):
+
 ```bash
+pip install -e ".[dev]"
 pytest
+```
+
+C++ tests (Catch2), built separately from the Python package:
+
+```bash
+cmake -S . -B build -DMRA_BUILD_TESTS=ON -DMRA_BUILD_PYTHON=OFF -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j
+./build/mra_tests            # tests for unfinished stubs are tagged [todo] and hidden; run with "[todo]"
 ```
 
 ## Data storage
@@ -75,4 +86,5 @@ See `python/mra/paths.py` for the code that defines this layout.
 
 - [High-level design](docs/high-level-design.md): architecture, components, and build order
 - [Data ingestion](docs/data-ingestion.md): pipeline, lake schema, and the returns views
+- [Analytics core](docs/analytics-core.md): conventions, model registry, and how to add a model
 
