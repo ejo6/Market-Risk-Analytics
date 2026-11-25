@@ -64,7 +64,7 @@ pytest
 All data lives under `MRA_DATA_DIR`, never in the repo:
 
 - `raw/`: Vendor responses exactly as fetched (never modified)
-- `lake/`: Parquet tables (bars_daily, corporate_actions, macro, factors)
+- `lake/`: Parquet tables (bars_daily, macro, factors). Derived data such as adjusted returns is computed on read by the views in `python/mra/views.py`
 - `snapshots/`: Dataset manifests that tie each model to an exact dataset
 - `models/`: Trained models (ONNX) and their metrics
 - `meta.sqlite`: Ingest watermarks, job runs, universe definitions
@@ -74,4 +74,5 @@ See `python/mra/paths.py` for the code that defines this layout.
 ## Documentation
 
 - [High-level design](docs/high-level-design.md): architecture, components, and build order
+- [Data ingestion](docs/data-ingestion.md): pipeline, lake schema, and the returns views
 

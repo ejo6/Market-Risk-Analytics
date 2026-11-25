@@ -41,10 +41,9 @@ def ingest_daily(symbols, provider, paths, meta):
                 failed += 1; continue
 
             # 5
-            bars, actions = normalize(con, table, provider.name, now)   
-            for name, t in (("bars_daily", bars), ("corporate_actions", actions)):
-                # 6
-                lake.write_lake(name, lake.only_changed(name, t, sym), run_ts)  
+            bars = normalize(con, table, provider.name, now)
+            # 6
+            lake.write_lake("bars_daily", lake.only_changed("bars_daily", bars, sym), run_ts)
 
             last = max(table.column("date").to_pylist())
             # 7: ALWAYS LAST

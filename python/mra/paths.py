@@ -21,7 +21,7 @@ from pathlib import Path
 ENV_VAR = "MRA_DATA_DIR"
 DEFAULT_DIR = "data"
 
-LAKE_TABLES = ("bars_daily", "corporate_actions", "macro", "factors")
+LAKE_TABLES = ("bars_daily", "macro", "factors")
 
 
 def data_dir() -> Path:

@@ -8,8 +8,7 @@ import duckdb
 
 class Lake:
     # Writing only new or changed rows
-    KEY = {"bars_daily": ["open", "high", "low", "close", "volume"],
-        "corporate_actions": ["div_cash", "split_factor"]}
+    KEY = {"bars_daily": ["open", "high", "low", "close", "volume", "div_cash", "split_factor"]}
 
     def __init__(self, paths: DataPaths, conn: duckdb.DuckDBPyConnection | None = None):
         self.paths = paths

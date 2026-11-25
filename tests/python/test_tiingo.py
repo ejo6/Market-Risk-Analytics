@@ -120,8 +120,8 @@ def test_pipeline_with_tiingo_provider(tmp_path):
         assert meta.watermark("tiingo", "daily", "SPY") == "2024-03-15"
 
     assert (paths.raw_landing("tiingo", "daily", run_id) / "SPY.json").read_bytes() == PAYLOAD
-    actions = pa.concat_tables(
-        pa.parquet.read_table(f) for f in paths.lake_table("corporate_actions").rglob("*.parquet")
-    )
-    assert actions.column("div_cash").to_pylist() == [1.6]
+    bars = pa.concat_tables(
+        pa.parquet.read_table(f) for f in paths.lake_table("bars_daily").rglob("*.parquet")
+    ).sort_by("date")
+    assert bars.column("div_cash").to_pylist() == [0.0, 1.6]
 
