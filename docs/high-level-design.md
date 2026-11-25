@@ -1,4 +1,4 @@
-**Note** Made with help from Sonnet 5.5 on 2026/11/16, needs a little rewrite
+**Note** Made with lots of help from Sonnet 5.5 on 2026/11/16, needs a little rewrite
 
 #### Summary 
 > A self-hosted, containerized platform that pulls market data into a local versioned lake, runs risk and portfolio analytics in a C++ core, retrains ML models through a gated pipeline, and serves results through an API and a TypeScript UI. The guiding idea is to **ship the pipeline, not the data**: each user supplies their own provider API keys and builds their own dataset.
