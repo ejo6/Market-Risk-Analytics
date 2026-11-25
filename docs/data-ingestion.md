@@ -74,6 +74,14 @@ All located in `python/mra/ingest/`
 - `validate.py`: validate the data
 
 
+### CLI Data Fetch
+In lieu of a proper UI during development, `python/mra/ingest/cli.py` allows for pulling data:
+
+```bash
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/mra-ingest SPY QQQ TLT # ingests SPY, QQQ, TLT symbol data, default first date
+```
+
 ## Lake Schema
 ### `bars_daily`
 One table, partitioned by `year`, append-only. Prices are stored **raw** (as traded, unadjusted):
@@ -117,16 +125,3 @@ gap_days  = date - prev_date                                      3 on Mondays, 
 Each symbol's first bar has no return and is dropped. `returns_daily` matches returns computed from Tiingo's own `adjClose` to ~1e-12.
 
 **Why compute on read, and why not C++:** DuckDB is already a vectorized C++ engine, and the cost is dominated by reading Parquet, not the arithmetic. On a synthetic lake of 5,000 symbols x 31 years (41.5M rows), the full universe took 1.3 s and a 20-symbol portfolio 0.03 s. If the C++ core later needs returns itself, it can run the same SQL through DuckDB's C++ API, so there is still one implementation.
-
-**Gotcha:** DuckDB checks the Parquet glob when a macro is created, so `register_views` raises on an empty lake (run `mra-ingest` first). Files written after registration are still picked up.
-
-### Changing the schema
-The raw files are kept, so the lake can be rebuilt without any API calls: move `data/lake` aside, then replay every raw fetch oldest-first through parse, validate, normalize and `only_changed`. This is how the move of `div_cash`/`split_factor` into `bars_daily` was migrated.
-
-### CLI Data Fetch
-In lieu of a proper UI during development, `python/mra/ingest/cli.py` allows for pulling data:
-
-```bash
-.venv/bin/pip install -e ".[dev]"
-.venv/bin/mra-ingest SPY QQQ TLT # ingests SPY, QQQ, TLT symbol data, default first date
-```
